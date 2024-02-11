@@ -1,6 +1,26 @@
 #include "Loader.h"
 
 /**
+*	Function to retrieve PE content from existing buffer.
+*	\param hDllBuffer : base address of existing buffer.
+* \param dSize : size of dll content within existing buffer.
+*	\return : address of the content in the explorer memory.
+*/
+HANDLE MemoryLoader::CopyBuffer(const PCHAR hDllBuffer, DWORD dSize)
+{
+	const HANDLE hBufferContent = HeapAlloc(GetProcessHeap(), 0, dSize);
+	if (hBufferContent == INVALID_HANDLE_VALUE)
+	{
+		printf("[-] An error occured when trying to allocate memory for the PE buffer content !\n");
+		CloseHandle(hBufferContent);
+		return nullptr;
+	}
+
+	CopyMemory(hBufferContent, hDllBuffer, dSize);
+	return hBufferContent;
+}
+
+/**
  *	Function to retrieve the PE file content.
  *	\param lpFilePath : path of the PE file.
  *	\return : address of the content in the explorer memory.
@@ -120,17 +140,8 @@ BOOL MemoryLoader::HasCallbacks(const LPVOID lpImage)
  *	\param lpDLLPath : path of the DLL file.
  *	\return : DLL address if success else nullptr.
  */
-LPVOID MemoryLoader::LoadDLL(const LPSTR lpDLLPath)
+LPVOID MemoryLoader::LoadDLL(const HANDLE hDLLData)
 {
-	printf("[+] DLL LOADER\n");
-
-	const HANDLE hDLLData = GetFileContent(lpDLLPath);
-	if (hDLLData == INVALID_HANDLE_VALUE || hDLLData == nullptr)
-	{
-		printf("[-] An error is occured when trying to get DLL's data !\n");
-		return nullptr;
-	}
-
 	printf("[+] DLL's data at 0x%p\n", (LPVOID)hDLLData);
 
 	if (!IsValidPE(hDLLData))
@@ -312,6 +323,35 @@ LPVOID MemoryLoader::LoadDLL(const LPSTR lpDLLPath)
 	printf("[+] DLL loaded successfully.\n");
 
 	return (LPVOID)lpAllocAddress;
+}
+
+
+LPVOID MemoryLoader::LoadDLL(const PCHAR pDllBuffer, DWORD dSize)
+{
+	printf("[+] DLL LOADER\n");
+
+	const HANDLE hDLLData = CopyBuffer(pDllBuffer, dSize);
+	if (hDLLData == INVALID_HANDLE_VALUE || hDLLData == nullptr)
+	{
+		printf("[-] An error is occured when trying to get DLL's data !\n");
+		return nullptr;
+	}
+
+	return LoadDLL(hDLLData);
+}
+
+LPVOID MemoryLoader::LoadDLL(const LPSTR lpDLLPath)
+{
+	printf("[+] DLL LOADER\n");
+
+	const HANDLE hDLLData = GetFileContent(lpDLLPath);
+	if (hDLLData == INVALID_HANDLE_VALUE || hDLLData == nullptr)
+	{
+		printf("[-] An error is occured when trying to get DLL's data !\n");
+		return nullptr;
+	}
+
+	return LoadDLL(hDLLData);
 }
 
 /**

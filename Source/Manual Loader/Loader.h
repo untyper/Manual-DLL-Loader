@@ -16,12 +16,15 @@ typedef struct IMAGE_RELOCATION_ENTRY {
 class MemoryLoader
 {
 public:
+	static LPVOID LoadDLL(const HANDLE hDLLData);
+	static LPVOID LoadDLL(const PCHAR hDllBuffer, DWORD dSize);
 	static LPVOID LoadDLL(const LPSTR lpDLLPath);
 	static LPVOID GetFunctionAddress(const LPVOID lpModule, const LPSTR lpFunctionName);
 	static LPVOID GetFunctionAddressByOrdinal(const LPVOID lpModule, const DWORD_PTR dOrdinal);
 	static BOOL FreeDLL(const LPVOID lpModule);
 
 private:
+  static HANDLE CopyBuffer(const PCHAR hDllBuffer, DWORD dSize);
 	static HANDLE GetFileContent(const LPSTR lpFilePath);
 	static BOOL IsValidPE(const LPVOID lpImage);
 	static BOOL IsDLL(const LPVOID hDLLData);
