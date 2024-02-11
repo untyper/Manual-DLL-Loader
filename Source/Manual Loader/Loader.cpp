@@ -3,7 +3,7 @@
 /**
 *	Function to retrieve PE content from existing buffer.
 *	\param hDllBuffer : base address of existing buffer.
-* \param dSize : size of dll content within existing buffer.
+* 	\param dSize : size of dll content within existing buffer.
 *	\return : address of the content in the explorer memory.
 */
 HANDLE MemoryLoader::CopyBuffer(const PCHAR hDllBuffer, DWORD dSize)
